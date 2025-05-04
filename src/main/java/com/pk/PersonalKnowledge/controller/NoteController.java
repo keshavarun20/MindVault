@@ -4,6 +4,7 @@ import com.pk.PersonalKnowledge.dto.CategoryDetailsDTO;
 import com.pk.PersonalKnowledge.dto.CategoryNameDTO;
 import com.pk.PersonalKnowledge.dto.NoteRequestDTO;
 import com.pk.PersonalKnowledge.model.Category;
+import com.pk.PersonalKnowledge.model.Note;
 import com.pk.PersonalKnowledge.service.CategoryService;
 import com.pk.PersonalKnowledge.service.NoteService;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 public class NoteController {
@@ -53,6 +56,15 @@ public class NoteController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Note created successfully.");
     }
 
+    @GetMapping("/api/notes/{id}")
+    public ResponseEntity<Map<String, Object>> getNoteById(@PathVariable UUID id){
+        return ResponseEntity.ok(noteService.getNoteById(id));
+    }
+
+    @GetMapping("/api/topics/{id}")
+    public ResponseEntity<Map<String, Object>> getTitleAndNotesById(@PathVariable UUID id){
+        return ResponseEntity.ok(noteService.getTitleAndNotesById(id));
+    }
 
 
 }

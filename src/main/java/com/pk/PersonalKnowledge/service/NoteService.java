@@ -10,9 +10,8 @@ import com.pk.PersonalKnowledge.repository.TagRepository;
 import com.pk.PersonalKnowledge.repository.TopicRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class NoteService {
@@ -39,11 +38,14 @@ public class NoteService {
                     return categoryRepository.save(newCategory);
                 });
 
-        // Create and save the topic under the category
-        Topic topic = new Topic();
-        topic.setTitle(title);
-        topic.setCategory(category);
-        topicRepository.save(topic);
+        // 2. Check if topic with given title exists under the same category
+        Topic topic = topicRepository.findByTitleAndCategory(title, category)
+                .orElseGet(() -> {
+                    Topic newTopic = new Topic();
+                    newTopic.setTitle(title);
+                    newTopic.setCategory(category);
+                    return topicRepository.save(newTopic);
+                });
 
         // Create or find tags and add them to a set
         Set<Tag> tags = new HashSet<>();
@@ -65,4 +67,32 @@ public class NoteService {
         noteRepository.save(note);
     }
 
+    public Map<String, Object> getNoteById(UUID id) {
+        Note note = noteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Note Not Found"));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("content", note.getContent());
+        result.put("tags", note.getTags().stream().map(Tag::getName).toList());
+
+        return result;
+    }
+    public Map<String, Object> getTitleAndNotesById(UUID id) {
+        Topic topic= topicRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Topic Not Found"));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("title", topic.getTitle());
+
+        List<Map<String, Object>> noteList = topic.getNotes().stream().map(note -> {
+            Map<String, Object> noteData = new HashMap<>();
+            noteData.put("content", note.getContent());
+            noteData.put("tags", note.getTags().stream().map(Tag::getName).toList());
+            return noteData;
+        }).toList();
+
+        result.put("notes", noteList);
+
+        return result;
+    }
 }
