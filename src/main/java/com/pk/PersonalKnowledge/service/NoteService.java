@@ -11,7 +11,6 @@ import com.pk.PersonalKnowledge.repository.TopicRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class NoteService {
@@ -38,7 +37,7 @@ public class NoteService {
                     return categoryRepository.save(newCategory);
                 });
 
-        // 2. Check if topic with given title exists under the same category
+        // 2. Check if the topic with given title exists under the same category
         Topic topic = topicRepository.findByTitleAndCategory(title, category)
                 .orElseGet(() -> {
                     Topic newTopic = new Topic();
@@ -77,8 +76,9 @@ public class NoteService {
 
         return result;
     }
+
     public Map<String, Object> getTitleAndNotesById(UUID id) {
-        Topic topic= topicRepository.findById(id)
+        Topic topic = topicRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Topic Not Found"));
 
         Map<String, Object> result = new HashMap<>();
