@@ -95,4 +95,67 @@ public class NoteService {
 
         return result;
     }
+
+    public void updateNote(UUID noteId, String newTitle, String newContent, String newCategoryName, String newCategoryDescription, List<String> newTagNames) {
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new RuntimeException("Note Note Found"));
+
+        Topic currentTopic = note.getTopic();
+        Category currentCategory = currentTopic.getCategory();
+
+        // 1. Update content
+        if (newContent != null) {
+            note.setContent(newContent);
+        }
+
+        // 2. Handle topic title update (shared across notes)
+        if (newTitle != null) {
+            currentTopic.setTitle(newTitle);
+            topicRepository.save(currentTopic);
+        }
+
+        // 3. Handle category update (per-note)
+        if (newCategoryName != null && !newCategoryName.equals(currentCategory.getName())) {
+            // Find or create the new category
+            Category newCategory = categoryRepository.findByName(newCategoryName)
+                    .orElseGet(() -> {
+                        Category cat = new Category();
+                        cat.setName(newCategoryName);
+                        cat.setDescription(newCategoryDescription != null ? newCategoryDescription : "");
+                        return categoryRepository.save(cat);
+                    });
+
+// Step 2: Create or reuse a topic with same title in the new category
+            String topicTitle = newTitle != null ? newTitle : note.getTopic().getTitle();
+
+            Topic newTopic = topicRepository.findByTitleAndCategory(topicTitle, newCategory)
+                    .orElseGet(() -> {
+                        Topic t = new Topic();
+                        t.setTitle(topicTitle);
+                        t.setCategory(newCategory);
+                        return topicRepository.save(t);
+                    });
+
+            // Step 3: Reassign topic and save the note
+            note.setTopic(newTopic);
+        }
+
+        // 4. Handle tag updates
+        if (newTagNames != null) {
+            Set<Tag> newTags = new HashSet<>();
+            for (String tagName : newTagNames) {
+                Tag tag = tagRepository.findByName(tagName)
+                        .orElseGet(() -> {
+                            Tag newTag = new Tag();
+                            newTag.setName(tagName);
+                            return tagRepository.save(newTag);
+                        });
+                newTags.add(tag);
+            }
+            note.setTags(newTags);
+        }
+
+        // 5. Save the updated note
+        noteRepository.save(note);
+    }
 }

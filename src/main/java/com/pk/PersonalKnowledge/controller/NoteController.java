@@ -3,10 +3,11 @@ package com.pk.PersonalKnowledge.controller;
 import com.pk.PersonalKnowledge.dto.CategoryDetailsDTO;
 import com.pk.PersonalKnowledge.dto.CategoryNameDTO;
 import com.pk.PersonalKnowledge.dto.NoteRequestDTO;
+import com.pk.PersonalKnowledge.dto.UpdateNoteRequestDTO;
 import com.pk.PersonalKnowledge.model.Category;
-import com.pk.PersonalKnowledge.model.Note;
 import com.pk.PersonalKnowledge.service.CategoryService;
 import com.pk.PersonalKnowledge.service.NoteService;
+import com.pk.PersonalKnowledge.service.TopicService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,10 +21,12 @@ public class NoteController {
 
     private final CategoryService categoryService;
     private final NoteService noteService;
+    private final TopicService topicService;
 
-    public NoteController(CategoryService categoryService, NoteService noteService) {
+    public NoteController(CategoryService categoryService, NoteService noteService, TopicService topicService) {
         this.categoryService = categoryService;
         this.noteService = noteService;
+        this.topicService = topicService;
     }
 
     @PostMapping("/api/categories")
@@ -39,7 +42,7 @@ public class NoteController {
     }
 
     @GetMapping("/api/{name}")
-    public ResponseEntity<CategoryDetailsDTO> getCategoryDetailsByName(@PathVariable String name){
+    public ResponseEntity<CategoryDetailsDTO> getCategoryDetailsByName(@PathVariable String name) {
         return ResponseEntity.ok(categoryService.getCategoryDetailsByName(name));
     }
 
@@ -57,13 +60,34 @@ public class NoteController {
     }
 
     @GetMapping("/api/notes/{id}")
-    public ResponseEntity<Map<String, Object>> getNoteById(@PathVariable UUID id){
+    public ResponseEntity<Map<String, Object>> getNoteById(@PathVariable UUID id) {
         return ResponseEntity.ok(noteService.getNoteById(id));
     }
 
     @GetMapping("/api/topics/{id}")
-    public ResponseEntity<Map<String, Object>> getTitleAndNotesById(@PathVariable UUID id){
+    public ResponseEntity<Map<String, Object>> getTitleAndNotesById(@PathVariable UUID id) {
         return ResponseEntity.ok(noteService.getTitleAndNotesById(id));
+    }
+
+    @GetMapping("/api/topics")
+    public ResponseEntity<List<String>> getAllTopicTitles() {
+        return ResponseEntity.ok(topicService.getAllTopicTitles());
+    }
+
+    @PutMapping("/api/notes/{id}")
+    public ResponseEntity<String> updateNote(
+            @PathVariable UUID id,
+            @RequestBody UpdateNoteRequestDTO request
+    ) {
+        noteService.updateNote(
+                id,
+                request.getTitle(),
+                request.getContent(),
+                request.getName(),
+                request.getDescription(),
+                request.getTagNames()
+        );
+        return ResponseEntity.ok("Note updated successfully");
     }
 
 
