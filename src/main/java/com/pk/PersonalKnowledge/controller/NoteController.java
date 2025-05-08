@@ -41,7 +41,7 @@ public class NoteController {
         return ResponseEntity.ok(categoryService.getAllCategoryNames());
     }
 
-    @GetMapping("/api/{name}")
+    @GetMapping("/api/categories/{name}")
     public ResponseEntity<CategoryDetailsDTO> getCategoryDetailsByName(@PathVariable String name) {
         return ResponseEntity.ok(categoryService.getCategoryDetailsByName(name));
     }
@@ -88,6 +88,34 @@ public class NoteController {
                 request.getTagNames()
         );
         return ResponseEntity.ok("Note updated successfully");
+    }
+
+    @DeleteMapping("/api/notes/{id}")
+    public ResponseEntity<String> deleteNoteById(@PathVariable UUID id) {
+        boolean deleted = noteService.deleteNoteById(id);
+        if (deleted) {
+            return ResponseEntity.ok("Note deleted");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/api/delete/tags")
+    public ResponseEntity<String> deleteTagsByNames(@RequestBody List<String> tagNames) {
+        noteService.deleteTagsByNames(tagNames);
+        return ResponseEntity.ok("Tags deleted and unlinked from all notes");
+    }
+
+    @DeleteMapping("/api/topics/{id}")
+    public ResponseEntity<String> deleteTopicById(@PathVariable UUID id) {
+        topicService.deleteTopicById(id);
+        return ResponseEntity.ok("Topic deleted");
+    }
+
+    @DeleteMapping("/api/categories/{id}")
+    public ResponseEntity<String> deleteCategoryById(@PathVariable UUID id) {
+        categoryService.deleteCategoryById(id);
+        return ResponseEntity.ok("Category deleted");
     }
 
 

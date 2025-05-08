@@ -8,6 +8,7 @@ import com.pk.PersonalKnowledge.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +34,7 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
-    public CategoryDetailsDTO getCategoryDetailsByName(String name){
+    public CategoryDetailsDTO getCategoryDetailsByName(String name) {
         Category category = categoryRepository.findByName(name)
                 .orElseThrow(() -> new RuntimeException("Category Not Found"));
 
@@ -42,5 +43,9 @@ public class CategoryService {
                 .collect(Collectors.toList());
 
         return new CategoryDetailsDTO(category.getName(), category.getDescription(), topicTitles);
+    }
+
+    public void deleteCategoryById(UUID id) {
+        categoryRepository.deleteById(id);
     }
 }

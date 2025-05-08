@@ -125,7 +125,7 @@ public class NoteService {
                         return categoryRepository.save(cat);
                     });
 
-// Step 2: Create or reuse a topic with same title in the new category
+// Step 2: Create or reuse a topic with the same title in the new category
             String topicTitle = newTitle != null ? newTitle : note.getTopic().getTitle();
 
             Topic newTopic = topicRepository.findByTitleAndCategory(topicTitle, newCategory)
@@ -158,4 +158,24 @@ public class NoteService {
         // 5. Save the updated note
         noteRepository.save(note);
     }
+
+    public boolean deleteNoteById(UUID id) {
+        Optional<Note> noteOptional = noteRepository.findById(id);
+        if (noteOptional.isPresent()) {
+            noteRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public void deleteTagsByNames(List<String> tagNames) {
+        List<Tag> tags = tagRepository.findByNameIn(tagNames);
+        for (Tag tag : tags) {
+            for (Note note : tag.getNotes()) {
+                note.getTags().remove(tag);
+            }
+            tagRepository.delete(tag);
+        }
+    }
+
 }
