@@ -125,7 +125,7 @@ public class NoteService {
                         return categoryRepository.save(cat);
                     });
 
-// Step 2: Create or reuse a topic with the same title in the new category
+            // Step 2: Create or reuse a topic with the same title in the new category
             String topicTitle = newTitle != null ? newTitle : note.getTopic().getTitle();
 
             Topic newTopic = topicRepository.findByTitleAndCategory(topicTitle, newCategory)
